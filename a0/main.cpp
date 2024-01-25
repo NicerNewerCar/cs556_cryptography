@@ -9,6 +9,8 @@
 #include <string>
 #include <vector>
 
+typedef std::map<unsigned int, std::vector<float>> A_map;
+
 template <typename T> T dot(const std::vector<T> &a, const std::vector<T> &b) {
   if (a.size() != b.size())
     throw std::runtime_error("dot(): len(a) != len(b)");
@@ -34,8 +36,7 @@ std::vector<float> compute_w(const std::string &cipher, unsigned int shift,
   return w;
 }
 
-std::map<unsigned int, std::vector<float>> compute_As(const std::string &cipher,
-                                                      int key_len) {
+A_map compute_As(const std::string &cipher, int key_len) {
   std::map<unsigned int, std::vector<float>> data;
   std::vector<float> a_0 = {.082, .015, .028, .043, .127, .022, .020,
                             .061, .070, .002, .008, .040, .024, .067,
@@ -74,7 +75,6 @@ int determine_key_length(const std::string &s) {
 }
 
 std::string guess_key(const std::string &cipher, int key_len) {
-  typedef std::map<unsigned int, std::vector<float>> A_map;
   A_map A = compute_As(cipher, key_len);
   std::string key = "";
   for (int j = 0; j < key_len; j++) {
