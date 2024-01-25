@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -8,8 +9,7 @@
 #include <string>
 #include <vector>
 
-template <typename T>
-float dot(const std::vector<T> &a, const std::vector<T> &b) {
+template <typename T> T dot(const std::vector<T> &a, const std::vector<T> &b) {
   if (a.size() != b.size())
     throw std::runtime_error("dot(): len(a) != len(b)");
   float sum = 0.0f;
@@ -37,8 +37,16 @@ std::vector<float> compute_w(const std::string &cipher, unsigned int shift,
 std::map<unsigned int, std::vector<float>> compute_As(const std::string &cipher,
                                                       int key_len) {
   std::map<unsigned int, std::vector<float>> data;
-  for (int i = 0; i < 26; i++) {
-    data.insert({i, compute_w(cipher, i, key_len)});
+  std::vector<float> a_0 = {.082, .015, .028, .043, .127, .022, .020,
+                            .061, .070, .002, .008, .040, .024, .067,
+                            .075, .019, .001, .060, .063, .091, .028,
+                            .010, .023, .001, .020, .001};
+  data.insert({0, a_0});
+  for (int i = 1; i < 26; i++) {
+    int shift = 26 - i;
+    std::vector<float> a_i(a_0);
+    std::rotate(a_i.begin(), a_i.begin() + shift, a_i.end());
+    data.insert({i, a_i});
   }
   return data;
 }
@@ -66,14 +74,16 @@ int determine_key_length(const std::string &s) {
 }
 
 std::string guess_key(const std::string &cipher, int key_len) {
-  // Debug this maybe?
-  std::map<unsigned int, std::vector<float>> A = compute_As(cipher, key_len);
+  typedef std::map<unsigned int, std::vector<float>> A_map;
+  A_map A = compute_As(cipher, key_len);
   std::string key = "";
   for (int j = 0; j < key_len; j++) {
     std::vector<float> w = compute_w(cipher, j, key_len);
-    std::vector<float> w_dot_a(26, 0);
-    for (int i = 0; i < 26; i++) {
-      w_dot_a[i] = dot(w, A[i]);
+    std::vector<float> w_dot_a;
+    // Dot product is not correct, w seems to be okay
+    // Investigate A
+    for (A_map::iterator it = A.begin(); it != A.end(); ++it) {
+      w_dot_a.push_back(dot(w, it->second));
     }
     int max_pos = std::distance(
         w_dot_a.begin(), std::max_element(w_dot_a.begin(), w_dot_a.end()));
@@ -105,14 +115,17 @@ std::string read_file(const std::string &file_name) {
   return strStream.str();
 }
 
-int main() {
-  std::string cipher = read_file("/home/aj/Documents/Crypto/a0/cipher.txt");
-  // std::cout << cipher << std::endl;
+int main(int argc, char *argv[]) {
+  if (argc != 2) {
+    std::cout << "Usage: ./poly_cipher <cipher file name>" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  std::string cipher = read_file(argv[1]);
   cipher.erase(
       std::remove_if(cipher.begin(), cipher.end(),
                      [](auto const &c) -> bool { return !std::isalnum(c); }),
       cipher.end());
-  std::cout << cipher << std::endl;
+  std::cout << "Cipher: " << cipher << std::endl;
   int estimated_key_len = determine_key_length(cipher);
   std::string estimated_key = guess_key(cipher, estimated_key_len);
   std::cout << "Estimated Key: " << estimated_key << std::endl;
