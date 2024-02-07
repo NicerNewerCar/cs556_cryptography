@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/home/aj/Documents/Crypto/a1/build",
+  "command": "/usr/bin/c++   -g -o CMakeFiles/rsa.dir/main.cpp.o -c /home/aj/Documents/Crypto/a1/main.cpp",
+  "file": "/home/aj/Documents/Crypto/a1/main.cpp"
+}
+]
