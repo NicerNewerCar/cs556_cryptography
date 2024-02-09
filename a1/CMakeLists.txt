@@ -13,5 +13,5 @@ if (NOT GMP_LIB)
   message(FATAL_ERROR "GMP not found!")
 endif()
 
-add_executable(rsa main.cpp lib.hpp)
+add_executable(rsa main.cpp rsa.hpp rsa.cpp brute_force.hpp brute_force.cpp) 
 target_link_libraries(rsa ${NTL_LIB} ${GMP_LIB})
