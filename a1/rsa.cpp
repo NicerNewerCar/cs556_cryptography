@@ -23,20 +23,24 @@ NTL::ZZ gcd(const NTL::ZZ &a, const NTL::ZZ &b) {
   return gcd(b, a % b);
 }
 
-NTL::ZZ expmod_rabin(const NTL::ZZ &a, const NTL::ZZ &b, const NTL::ZZ &m) {
+NTL::ZZ expmod_rabin(const NTL::ZZ &a, const NTL::ZZ &b, const NTL::ZZ &m,
+                     const NTL::ZZ &v) {
   if (NTL::IsZero(b))
-    return NTL::ZZ(1);
+    return v;                // Return the vairence
   else if (!NTL::IsOdd(b)) { // Even path
-    NTL::ZZ y = expmod_rabin(a, b / 2, m);
-    NTL::ZZ z = NTL::PowerMod(y, 2, m);
-    if (NTL::IsOne(z) && !NTL::IsOne(y % m) && (y % m) != (m - 1))
-      return NTL::ZZ(0);
-    return z;
+
+    NTL::ZZ a_squared = NTL::PowerMod(a, NTL::ZZ(2), m);
+    if (NTL::IsOne(a_squared) && !NTL::IsOne(a % m) && (a % m) != (m - 1))
+      return NTL::ZZ(0); // Rabin Test
+    return expmod_rabin(a_squared, b / 2, m, v);
   } else { // Odd path
-    NTL::ZZ y = expmod_rabin(a, b - 1, m);
-    NTL::ZZ z = (y * a) % m;
-    return z;
+    NTL::ZZ va = (v * a) % m;
+    return expmod_rabin(a, b - 1, m, va);
   }
+}
+
+NTL::ZZ expmod_rabin(const NTL::ZZ &a, const NTL::ZZ &b, const NTL::ZZ &m) {
+  return expmod_rabin(a, b, m, NTL::ZZ(1));
 }
 
 bool miller_rabin(const NTL::ZZ &m, const long &L) {

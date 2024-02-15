@@ -34,6 +34,9 @@ NTL::ZZ gcd(const NTL::ZZ &a, const NTL::ZZ &b);
 
 NTL::ZZ expmod_rabin(const NTL::ZZ &a, const NTL::ZZ &b, const NTL::ZZ &m);
 
+NTL::ZZ expmod_rabin(const NTL::ZZ &a, const NTL::ZZ &b, const NTL::ZZ &m,
+                     const NTL::ZZ &v);
+
 bool miller_rabin(const NTL::ZZ &m, const long &L);
 
 std::pair<NTL::ZZ, NTL::ZZ> pulveriser(const NTL::ZZ &a, const NTL::ZZ &b,

@@ -15,7 +15,8 @@ int main(int argc, char *argv[]) {
   std::vector<NTL::ZZ> cipher = r.encrypt(message);
   std::string test_decrypt = r.decrypt(cipher);
 
-  std::cout << "\n\nTest decrypt/encrypt:\n";
+  std::cout
+      << "\n\nTest encrypt then decrypt (This should be the same as above):\n";
   std::cout << test_decrypt << std::endl;
 
   r.write_privatekeys("my.privatekeys");
