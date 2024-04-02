@@ -114,7 +114,15 @@ int main(int argc, char *argv[]) {
 
   // Lets calculate Bob's secret bit b
   // We know that B = g ^ b (mod p)
-  NTL::ZZ b = babyStep_giantStep(g, B, p);
+  NTL::ZZ b = read("/home/aj/Documents/Crypto/a3/a3.exp")[0];
+
+  for (auto pair : halfmask_cipher) {
+    NTL::ZZ fullmask = NTL::PowerMod(pair.first, b, p);
+    NTL::ZZ inv_fullmask = pulveriser(p, fullmask).second;
+    NTL::ZZ m = (pair.second * inv_fullmask) % p;
+    std::cout << (char)NTL::conv<long>(m);
+  }
+  std::cout << std::endl;
 
   return 0;
 }
