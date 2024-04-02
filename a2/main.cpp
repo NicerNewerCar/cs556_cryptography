@@ -41,10 +41,6 @@ int main(int argc, char *argv[]) {
   NTL::ZZ e = ne[1];
   NTL::ZZ phi = read("/home/aj/Documents/Crypto/a2/a2.hint")[0];
   std::pair<NTL::ZZ, NTL::ZZ> pq = get_pq(n, phi);
-  // std::cout << "p: " << pq.first << " q: " << pq.second << std::endl;
-  std::cout << "Validate with n: " << (n == pq.first * pq.second) << std::endl;
-  std::cout << "Validate with phi: "
-            << (phi == (pq.first - 1) * (pq.second - 1)) << std::endl;
 
   NTL::ZZ d = pulveriser(phi, e).second;
 
