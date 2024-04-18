@@ -1,6 +1,7 @@
 import socket
 import threading
 
+import cryptography
 from OpenSSL import crypto
 
 
@@ -12,6 +13,16 @@ def handle_client(client_socket):
     k.generate_key(crypto.TYPE_RSA, bitlength)
     print("Sending public keys...")
     client_socket.sendall(crypto.dump_publickey(crypto.FILETYPE_PEM, k))
+
+    crypto_key = k.to_cryptography_key()
+    hash_ = cryptography.hazmat.primitives.hashes.SHA256()
+    mfg = cryptography.hazmat.primitives.asymmetric.padding.MGF1(hash_)
+    padding = cryptography.hazmat.primitives.asymmetric.padding.OAEP(mfg, hash_, None)
+
+    encrypyted_aes_string = client_socket.recv(1024)
+    aes_string = crypto_key.decrypt(encrypyted_aes_string, padding)
+    print("Received AES key: ", encrypyted_aes_string)
+    print("Decrypted AES key", aes_string)
 
     while True:
         data = client_socket.recv(1024)
