@@ -1,0 +1,7 @@
+This is Homework 3 for Cryptography Spring 2024
+Send back this plaintext unencrypted by email along with all the ElGamal keys used for the encryption.
+Then, implement a simple socket-based chat protocol that uses a public-key cryptosystem (RSA or ElGamal) 
+with a secret-key cryptosystem (DES or AES) in a programming language of your choice. Allow the users to 
+choose the prime bit-length used for RSA/ElGamal and the secret passphrase used in DES/AES. Submit a demo
+video of your program. You may work in groups of three.
+
