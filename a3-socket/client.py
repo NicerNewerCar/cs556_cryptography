@@ -1,3 +1,4 @@
+import os
 import socket
 
 import cryptography
@@ -5,6 +6,14 @@ from OpenSSL import crypto
 
 # Server sends RSA public keys
 # Client send encrypted string as the passphrase for DES
+
+
+def pad(string: str):
+    size = int(256 / 8)
+    if len(string) > size:
+        return string[0:size]
+    diff = size - len(string)
+    return string + b"\0" * diff
 
 
 def main():
@@ -25,17 +34,20 @@ def main():
     padding = cryptography.hazmat.primitives.asymmetric.padding.OAEP(mfg, hash_, None)
 
     aes_string = input("Secret string for AES: ")
-    padder = cryptography.hazmat.primitives.symmetric.padding.PKCS7(256).padder()
-    print(len(padder.update(aes_string.encode("utf-8"))))
-    encrpyted_message = crypto_key.encrypt(aes_string.encode("utf-8"), padding)
+    aes_string = aes_string.encode("utf-8")
+    encrpyted_message = crypto_key.encrypt(aes_string, padding)
     client_socket.sendall(encrpyted_message)
+
+    aes = cryptography.hazmat.primitives.ciphers.algorithms.AES(pad(aes_string))
+
+    iv = ("\0" * 16).encode("utf-8")
+    encryptor = cryptography.hazmat.primitives.ciphers.Cipher(
+        aes, mode=cryptography.hazmat.primitives.ciphers.modes.OFB(iv)
+    ).encryptor()
 
     while True:
         message = input("Enter your message: ")
-        client_socket.sendall(message.encode("utf-8"))
-        data = client_socket.recv(1024)
-        response = data.decode("utf-8")
-        print(f"Server response: {response}")
+        client_socket.sendall(encryptor.update(message.encode("utf-8")))
 
 
 if __name__ == "__main__":

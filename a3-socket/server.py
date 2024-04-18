@@ -1,8 +1,17 @@
+import os
 import socket
 import threading
 
 import cryptography
 from OpenSSL import crypto
+
+
+def pad(string: str):
+    size = int(256 / 8)
+    if len(string) > size:
+        return string[0:size]
+    diff = size - len(string)
+    return string + b"\0" * diff
 
 
 def handle_client(client_socket):
@@ -23,15 +32,20 @@ def handle_client(client_socket):
     aes_string = crypto_key.decrypt(encrypyted_aes_string, padding)
     print("Received AES key: ", encrypyted_aes_string)
     print("Decrypted AES key", aes_string)
+    aes = cryptography.hazmat.primitives.ciphers.algorithms.AES(pad(aes_string))
+
+    iv = ("\0" * 16).encode("utf-8")
+    decryptor = cryptography.hazmat.primitives.ciphers.Cipher(
+        aes, mode=cryptography.hazmat.primitives.ciphers.modes.OFB(iv)
+    ).decryptor()
 
     while True:
         data = client_socket.recv(1024)
         if not data:
             break
-        message = data.decode("utf-8")
-        print(f"Received message: {message}")
-        response = "Server received your message: " + message
-        client_socket.sendall(response.encode("utf-8"))
+        decrypted = decryptor.update(data)
+        print(f"Received message: {data}")
+        print(f"Decrypted message: {decrypted}")
     client_socket.close()
 
 
